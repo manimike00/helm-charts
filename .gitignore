@@ -37,5 +37,4 @@ terraform.rc
 *.terraform.lock.hcl*
 
 helm
-
 notes.txt
