@@ -1,0 +1,17 @@
+config:
+  enabled: true
+  global: {}
+  # slack_api_url: ''
+
+  templates:
+    - '/etc/alertmanager/*.tmpl'
+
+  receivers:
+    - name: default-receiver
+      email_configs:
+      - to: ''
+        from: ''
+        smarthost: 'smtp.gmail.com:587'
+        auth_username: ''
+        auth_password: ''
+        send_resolved: false
