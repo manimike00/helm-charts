@@ -1,0 +1,18 @@
+architecture: replication
+
+auth:
+  rootPassword: "qwertyuiop"
+  database: customdb
+  username: "customuser"
+  password: "asdfghjkl"
+  replicationUser: replicator
+  replicationPassword: "zxcvbnmzxcvbnm"
+
+primary:
+  persistence:
+    enabled: false
+
+secondary:
+  replicaCount: 3
+  persistence:
+    enabled: false
