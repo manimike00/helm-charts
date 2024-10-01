@@ -1,0 +1,58 @@
+#kubectl create secret generic azure-storage-account-secret --from-literal=accountName="" --from-literal=accountKey="" -n cloudnative-pg
+
+
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: my-production-cluster
+  namespace: cloudnative-pg
+spec:
+  instances: 3  # Three instances for high availability (primary + 2 replicas)
+  imageName: ghcr.io/cloudnative-pg/postgresql:15  # PostgreSQL version
+  postgresql:
+    parameters:
+      shared_buffers: "1GB"
+      work_mem: "64MB"
+      maintenance_work_mem: "128MB"
+      max_connections: "200"  # Adjust according to your needs
+  storage:
+    size: 100Gi  # Adjust the size according to your requirements
+    storageClass: gp2  # Use your preferred storage class
+  bootstrap:
+    initdb:
+      database: mydb  # Initial database name
+      owner: mydbuser  # Initial database owner
+      secret:
+        name: mydb-secret  # Secret containing the password for the initial database user
+    pg_hba:
+      - type: host
+        database: all
+        user: all
+        address: 0.0.0.0/0
+        method: md5
+    recovery:
+      backup:
+        pvcName: my-backup-pvc  # PVC where backups are stored
+  backup:
+    barmanObjectStore:
+      destinationPath: azure://<storage_account>/<container_name>  # Replace with your storage account and container
+      azureCredentials:
+        accountName:
+          name: azure-storage-account-secret
+          key: accountName  # The name of the key in the secret containing your Azure Storage Account name
+        accountKey:
+          name: azure-storage-account-secret
+          key: accountKey  # The name of the key in the secret containing your Azure Storage Account access key
+      walRetention: "7d"  # Retain WAL files for 7 days
+      retentionPolicy: "7d"  # Keep backups for 7 days
+  monitoring:
+    enablePodMonitor: true  # Enable Prometheus monitoring
+  resources:
+    requests:
+      memory: 500Mi
+      cpu: 100m
+    limits:
+      memory: 1Gi
+      cpu: "1"
+  primaryUpdateStrategy: hot-standby  # Allows a rolling update of the cluster
+  logLevel: info
