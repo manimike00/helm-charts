@@ -1,0 +1,71 @@
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: paralus-http
+  namespace: paralus
+spec:
+  selector:
+    istio: gateway
+  servers:
+    - port:
+        number: 80
+        name: http
+        protocol: HTTP
+      hosts:
+        - console.airvays.com
+        - "*.core-connector.airvays.com"
+        - "*.user.airvays.com"
+---
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: paralus-https
+  namespace: paralus
+spec:
+  selector:
+    istio: gateway
+  servers:
+#    - port:
+#        number: 80
+#        name: http
+#        protocol: HTTP
+#      hosts:
+#        - console.airvays.com
+#        - "*.core-connector.airvays.com"
+#        - "*.user.airvays.com"
+#      tls:
+#        httpsRedirect: true
+    - port:
+        number: 443
+        name: https
+        protocol: HTTPS
+      tls:
+        mode: SIMPLE
+        credentialName: httpsbin-credential
+      hosts:
+        - console.airvays.com
+        - "*.core-connector.airvays.com"
+        - "*.user.airvays.com"
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: paralus
+  namespace: paralus
+spec:
+  hosts:
+    - console.airvays.com
+    - "*.core-connector.airvays.com"
+    - "*.user.airvays.com"
+  gateways:
+    - paralus-http
+    - paralus-https
+  http:
+    - match:
+        - uri:
+            prefix: /
+      route:
+        - destination:
+            host: paralus-contour-envoy
+            port:
+              number: 80
