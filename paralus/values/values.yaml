@@ -1,0 +1,19 @@
+deploy:
+  postgresql:
+    address: "cluster-example-rw.cloudnative-pg.svc.cluster.local"
+    username: "app"
+    password: "of8uRcNq8El8qDcjjvtMvMVz9afPhNIWBddEcOjH8jO3pdwicynz5ATfKH7V0aV5"
+    database: "app"
+  filebeat:
+    enable: false
+  fluentbit:
+    enable: false
+
+fqdn:
+  domain: airvays.com
+
+contour:
+  envoy:
+    service:
+      annotations: {}
+      type: ClusterIP
